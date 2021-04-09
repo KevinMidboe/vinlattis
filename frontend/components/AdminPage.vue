@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import Tabs from "@/ui/Tabs";
 import RegisterWinePage from "@/components/admin/RegisterWinePage";
 import archiveLotteryPage from "@/components/admin/archiveLotteryPage";
@@ -18,24 +19,39 @@ export default {
   },
   data() {
     return {
-      tabs: [
+
+    };
+  },
+  created() {
+    this.fetchAttendees();
+    this.fetchWines();
+    this.fetchWinners();
+  },
+  computed: {
+    ...mapGetters("admin", [
+      "attendees",
+      "wines",
+      "winners"
+    ]),
+    tabs() {
+      return [
         {
           name: "Vin",
           component: RegisterWinePage,
           slug: "vin",
-          counter: null
+          counter: this.wines.length
         },
         {
           name: "Legg til deltakere",
           component: registerAttendeePage,
           slug: "attendees",
-          counter: null
+          counter: this.attendees.length
         },
         {
           name: "Trekk vinner",
           component: DrawWinnerPage,
           slug: "draw",
-          counter: null
+          counter: this.winners.length
         },
         {
           name: "Arkiver lotteri",
@@ -49,7 +65,14 @@ export default {
           slug: "push"
         }
       ]
-    };
+    }
+  },
+  methods: {
+    ...mapActions("admin", [
+      "fetchAttendees",
+      "fetchWines",
+      "fetchWinners"
+    ]),
   }
 };
 </script>

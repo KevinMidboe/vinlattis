@@ -68,6 +68,7 @@
 
 <script>
 import io from "socket.io-client";
+import { mapGetters, mapActions } from "vuex";
 import Attendees from "@/ui/Attendees";
 import RaffleGenerator from "@/ui/RaffleGenerator";
 
@@ -98,21 +99,16 @@ export default {
         key: "yellow",
         value: 0
       },
-      isAdmin: false,
       name: null,
       phoneNumber: null,
       raffles: 0,
       randomColors: false,
-      attendees: [],
       autocompleteAttendees: [],
       socket: null,
       previousAttendees: []
     };
   },
   watch: {
-    attendees() {
-      this.$emit("counter", this.attendees.length || 0);
-    },
     randomColors(val) {
       if (val == false) {
         this.colors.map(color => (color.value = 0));
@@ -141,30 +137,22 @@ export default {
     }
   },
   created() {
-    this.getAttendees();
+    this.fetchAttendees();
   },
   computed: {
     colors() {
       return [this.red, this.blue, this.green, this.yellow];
-    }
+    },
+    ...mapGetters("admin", ["attendees", "isAdmin"])
   },
   methods: {
+    ...mapActions("admin", ["fetchAttendees"]),
     setName(name) {
       this.name = name;
       this.$refs.phone.focus();
     },
     setWithRandomColors(colors) {
       Object.keys(colors).forEach(color => (this[color].value = colors[color]));
-    },
-    checkIfAdmin(resp) {
-      this.isAdmin = resp.headers.get("vinlottis-admin") == "true" || false;
-      return resp;
-    },
-    getAttendees: async function() {
-      return fetch("/api/lottery/attendees")
-        .then(resp => this.checkIfAdmin(resp))
-        .then(resp => resp.json())
-        .then(response => (this.attendees = response.attendees));
     },
     sendAttendee: async function() {
       const { red, blue, green, yellow } = this;
@@ -212,7 +200,7 @@ export default {
             this.randomColors = false;
 
             this.$refs.name.focus();
-            this.getAttendees();
+            this.fetchAttendees();
           } else {
             this.$toast.error({
               title: `Klarte ikke sende deltaker`,
@@ -230,10 +218,11 @@ export default {
           .then(resp => resp.json())
           .then(response => {
             if (response.success) {
-              this.attendees = [];
               this.$toast.info({
                 title: "Slettet alle deltakere."
               });
+
+              this.fetchAttendees();
             } else {
               this.$toast.error({
                 title: "Klarte ikke slette deltakere",

@@ -86,20 +86,24 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
+
 export default {
   data() {
     return {
-      wines: [],
       drawingWinner: false,
       secondsLeft: 20,
       drawTime: 20,
-      winners: [],
       editingWinner: undefined
     };
   },
   created() {
-    this.fetchLotterWines();
-    this.fetchLotterWinners();
+    this.fetchWinners();
+  },
+  watch: {
+    winners(val) {
+      this.$emit("counter", val.length);
+    }
   },
   computed: {
     winnersToDraw() {
@@ -108,24 +112,11 @@ export default {
       }
 
       return this.wines.length - this.winners.length;
-    }
-  },
-  watch: {
-    winners(val) {
-      this.$emit("counter", val.length);
-    }
+    },
+    ...mapGetters("admin", ["winners", "wines"])
   },
   methods: {
-    fetchLotterWines() {
-      return fetch("/api/lottery/wines")
-        .then(resp => resp.json())
-        .then(response => (this.wines = response.wines));
-    },
-    fetchLotterWinners() {
-      return fetch("/api/lottery/winners")
-        .then(resp => resp.json())
-        .then(response => (this.winners = response.winners));
-    },
+    ...mapActions("admin", ["fetchWinners", "fetchWines"]),
     countdown() {
       if (this.drawingWinner == false) {
         return;

@@ -3,10 +3,11 @@ import VueRouter from "vue-router";
 import { routes } from "@/router.js";
 import Vinlottis from "@/Vinlottis";
 
-import Toast from "@/plugins/Toast";
-
 import * as Sentry from "@sentry/browser";
 import { Vue as VueIntegration } from "@sentry/integrations";
+
+import Toast from "@/plugins/Toast";
+import store from "@/store";
 
 Vue.use(VueRouter);
 
@@ -52,6 +53,7 @@ const router = new VueRouter({
 new Vue({
   el: "#app",
   router,
+  store,
   components: { Vinlottis },
   template: "<Vinlottis/>",
   render: h => h(Vinlottis)

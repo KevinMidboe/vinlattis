@@ -75,6 +75,7 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import ScanToVinmonopolet from "@/ui/ScanToVinmonopolet";
 import Wine from "@/ui/Wine";
 
@@ -82,7 +83,6 @@ export default {
   components: { ScanToVinmonopolet, Wine },
   data() {
     return {
-      wines: [],
       editingWine: undefined,
       showCamera: false,
       showImportLink: false,
@@ -95,14 +95,13 @@ export default {
     }
   },
   created() {
-    this.fetchLotterWines();
+    this.fetchWines();
+  },
+  computed: {
+    ...mapGetters("admin", ["wines"]),
   },
   methods: {
-    fetchLotterWines() {
-      fetch("/api/lottery/wines")
-        .then(resp => resp.json())
-        .then(response => (this.wines = response.wines));
-    },
+    ...mapActions("admin", ["fetchWines"]),
     wineFromVinmonopoletScan(wineResponse) {
       if (this.wines.map(wine => wine.name).includes(wineResponse.name)) {
         this.toastText = "Vinen er allerede lagt til.";
